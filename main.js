@@ -12,40 +12,39 @@
 			return this.three_element;
 		},
 		register_animation_callbacks: function(world) {
+			var _this = this;
 			world.register_animation_callback(function callbackRotate(){
-				this.three_element.rotation.x += 0.1;
-				this.three_element.rotation.y += 0.1;
+				_this.three_element.rotation.x += 0.01;
+				_this.three_element.rotation.y += 0.01;
 			});
 		}
 	}
 
-	function World(container) {
-		this.container = container;
-		this.container_width = container.clientWidth;
-		this.container_height = container.clientHeight;
-	}
+	function World() {}
 	World.prototype = {
 		init: function() {
 			this.scene = new THREE.Scene();
 			this.camera = new THREE.PerspectiveCamera(
 				75,
-				this.container_width / this.container_height,
+				window.innerWidth / window.innerHeight,
 				0.1,
 				1000
 			);
 			this.renderer = new THREE.WebGLRenderer();
-			this.renderer.setSize(this.container_width, this.container_height);
-			this.container.appendChild(this.renderer.domElement);
+			this.renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(this.renderer.domElement);
 			this.callbacks = [];
 		},
 		start: function() {
-			var render = function () {
+			var _this = this,
+			render = function() {
 				requestAnimationFrame(render);
-				for (var i = 0; i < this.callbacks.length; i++) {
-					this.callbacks[i]();
+				for (var i = 0; i < _this.callbacks.length; i++) {
+					_this.callbacks[i]();
 				}
-				renderer.render(scene, camera);
+				_this.renderer.render(_this.scene, _this.camera);
 			};
+			render();
 		},
 		add: function(obj) {
 			this.scene.add(obj);
@@ -67,14 +66,13 @@
 	}
 
 	window.onload = function() {
-
-		var world = new World(document.body),
+		var world = new World(),
 		wave = new Wave();
-
 		world.init();
-		wave.init();
+		wave.init(world);
 		world.add(wave.get_three_element());
-
+		world.move_camera(undefined, undefined, 5);
+		world.start();
 	}
 
 })();
