@@ -15,15 +15,11 @@
 			line_count = this.lines.length,
 			y,
 			z = 0;
-			if (line_count > 1000) {
-				this.lines.splice(-1, 1);
-			}
 			y = 2 * Math.sin(0.1 * line_count);
 			this.lines.push({
 				added: false,
 				obj: this.create_line_object(x, y, z)
 			});
-			this.next_z++;
 		},
 		create_line_object: function(x, y, z) {
 			var geometry = new THREE.Geometry(),
@@ -52,7 +48,7 @@
 				for (var i = 0; i < _this.lines.length; i++) {
 					var vertices = _this.lines[i].obj.geometry.vertices;
 					for (var j = 0; j < vertices.length; j++) {
-						vertices[j].z -= 0.05;
+						vertices[j].z -= 1;
 					}
 					_this.lines[i].obj.geometry.verticesNeedUpdate = true;
 				}
