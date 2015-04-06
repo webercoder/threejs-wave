@@ -1,5 +1,25 @@
 (function(){
 
+	var ColorHelper = (function() {
+		function random_non_black() {
+			return Math.random() * (256 - 20) + 20;
+		}
+		// http://stackoverflow.com/a/5624139/210827
+		function rgb_to_hex(r, g, b) {
+			var val = ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+			return parseInt(val, 16);
+		}
+		return {
+			random_color: function() {
+				return rgb_to_hex(
+					random_non_black(),
+					random_non_black(),
+					random_non_black()
+				)
+			}
+		}
+	})();
+
 	function Wave() {}
 	Wave.prototype = {
 		init: function(world) {
@@ -31,7 +51,7 @@
 			geometry.vertices.push(new THREE.Vector3(-1 * x, y, z));
 			geometry.vertices.push(new THREE.Vector3(x, y, z));
 			geometry.verticesNeedUpdate = true;
-			material = new THREE.MeshBasicMaterial({color: 0xffffff});
+			material = new THREE.MeshBasicMaterial({color: ColorHelper.random_color()});
 			line = new THREE.Line(geometry, material);
 			line.dynamic = true;
 			return line;
