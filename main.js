@@ -6,21 +6,26 @@
 			var line;
 			this.world = world;
 			this.lines = [];
-			this.create_wave();
+			this.create_line();
 			this.add_new_lines();
 			this.register_animation_callbacks(world);
 		},
-		create_wave: function() {
-			var x = 5, y, z;
-			for (z = 0; z < 1000; z++) {
-				y = x * Math.sin(0.1 * z) - x;
-				this.lines.push({
-					added: false,
-					obj: this.create_line(x, y, z)
-				});
+		create_line: function() {
+			var x = 5,
+			line_count = this.lines.length,
+			y,
+			z = 0;
+			if (line_count > 1000) {
+				this.lines.splice(-1, 1);
 			}
+			y = 2 * Math.sin(0.1 * line_count);
+			this.lines.push({
+				added: false,
+				obj: this.create_line_object(x, y, z)
+			});
+			this.next_z++;
 		},
-		create_line: function(x, y, z) {
+		create_line_object: function(x, y, z) {
 			var geometry = new THREE.Geometry(),
 			material,
 			line;
@@ -43,7 +48,7 @@
 		},
 		register_animation_callbacks: function(world) {
 			var _this = this;
-			world.register_animation_callback(function callbackMove(){
+			world.register_animation_callback(function callbackLines() {
 				for (var i = 0; i < _this.lines.length; i++) {
 					var vertices = _this.lines[i].obj.geometry.vertices;
 					for (var j = 0; j < vertices.length; j++) {
@@ -51,6 +56,8 @@
 					}
 					_this.lines[i].obj.geometry.verticesNeedUpdate = true;
 				}
+				_this.create_line();
+				_this.add_new_lines();
 			});
 		}
 	}
@@ -81,8 +88,6 @@
 			};
 			render();
 		},
-		add: function(obj) {
-		},
 		move_camera: function(x, y, z) {
 			if (x !== undefined) {
 				this.camera.position.x = x;
@@ -104,7 +109,7 @@
 		wave = new Wave();
 		world.init();
 		wave.init(world);
-		world.move_camera(undefined, undefined, 5);
+		world.move_camera(undefined, undefined, 3.5);
 		world.start();
 	}
 
