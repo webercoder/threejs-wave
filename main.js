@@ -15,6 +15,9 @@
 			line_count = this.lines.length,
 			y,
 			z = 0;
+			if (this.lines.length > 1000) {
+				this.remove_lines();
+			}
 			y = 2 * Math.sin(0.1 * line_count);
 			this.lines.push({
 				added: false,
@@ -41,6 +44,12 @@
 				}
 			}
 			return this.three_element;
+		},
+		remove_lines: function() {
+			for (var i = 0; i < this.lines.length; i++) {
+				this.world.scene.remove(this.lines[i].obj);
+			}
+			this.lines = [];
 		},
 		register_animation_callbacks: function(world) {
 			var _this = this;
