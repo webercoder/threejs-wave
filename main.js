@@ -28,21 +28,24 @@
 			this.lines = [];
 			this.create_line();
 			this.add_new_lines();
+			this.total_lines_created = 0;
 			this.register_animation_callbacks(world);
 		},
 		create_line: function() {
 			var x = 5,
-			line_count = this.lines.length,
 			y,
 			z = 0;
-			if (this.lines.length > 1000) {
-				this.remove_lines();
+			if (this.lines.length > 300) {
+				var removed = this.lines.shift();
+				this.world.scene.remove(removed.obj);
+				delete removed;
 			}
-			y = 2 * Math.sin(0.1 * line_count);
+			y = Math.sin(0.05 * this.total_lines_created);
 			this.lines.push({
 				added: false,
 				obj: this.create_line_object(x, y, z)
 			});
+			this.total_lines_created++;
 		},
 		create_line_object: function(x, y, z) {
 			var geometry = new THREE.Geometry(),
@@ -65,19 +68,13 @@
 			}
 			return this.three_element;
 		},
-		remove_lines: function() {
-			for (var i = 0; i < this.lines.length; i++) {
-				this.world.scene.remove(this.lines[i].obj);
-			}
-			this.lines = [];
-		},
 		register_animation_callbacks: function(world) {
 			var _this = this;
 			world.register_animation_callback(function callbackLines() {
 				for (var i = 0; i < _this.lines.length; i++) {
 					var vertices = _this.lines[i].obj.geometry.vertices;
 					for (var j = 0; j < vertices.length; j++) {
-						vertices[j].z -= 1;
+						vertices[j].z -= 0.02;
 					}
 					_this.lines[i].obj.geometry.verticesNeedUpdate = true;
 				}
