@@ -12,8 +12,8 @@
 		return {
 			random_color: function() {
 				return rgb_to_hex(
-					random_non_black(),
-					random_non_black(),
+					0,
+					0,
 					random_non_black()
 				)
 			}
@@ -97,6 +97,7 @@
 			this.renderer = new THREE.WebGLRenderer();
 			this.renderer.setSize(window.innerWidth, window.innerHeight);
 			document.body.appendChild(this.renderer.domElement);
+			this.setup_camera_controls();
 			this.callbacks = [];
 		},
 		start: function() {
@@ -110,19 +111,105 @@
 			};
 			render();
 		},
-		move_camera: function(x, y, z) {
-			if (x !== undefined) {
-				this.camera.position.x = x;
+		move_camera: function(args) {
+			if ('x' in args) {
+				this.camera.position.x += args.x;
 			}
-			if (y !== undefined) {
-				this.camera.position.y = y;
+			if ('y' in args) {
+				this.camera.position.y += args.y;
 			}
-			if (z !== undefined) {
-				this.camera.position.z = z;
+			if ('z' in args) {
+				this.camera.position.z += args.z;
 			}
+			console.log("New coordinates", this.camera.position);
 		},
 		register_animation_callback: function(callback /* , position */) {
 			this.callbacks.push(callback);
+		},
+		setup_camera_controls: function() {
+			var _this = this;
+			document.addEventListener(
+				"keydown",
+				function(e) {
+					e.preventDefault();
+					var key_code = e.which || e.keyCode;
+					switch (key_code) {
+						case 87: // w
+						case 38: // up
+							_this.move_camera({z: 0.5});
+							break;
+						case 83: // s
+						case 40: //down
+							_this.move_camera({z: -0.5});
+							break;
+						case 65: // a
+						case 37: // left
+							_this.move_camera({x: -0.5});
+							break;
+						case 68: // d
+						case 39: // right
+							_this.move_camera({x: 0.5});
+							break;
+					}
+				}, 
+				false
+			);
+			function get_current_position() {
+				// http://stackoverflow.com/a/7790764/210827
+				var dot, eventDoc, doc, body, pageX, pageY;
+				event = event || window.event;
+				if (event.pageX == null && event.clientX != null) {
+					eventDoc = (event.target && event.target.ownerDocument) || document;
+					doc = eventDoc.documentElement;
+					body = eventDoc.body;
+					event.pageX = event.clientX +
+					(doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+					(doc && doc.clientLeft || body && body.clientLeft || 0);
+					event.pageY = event.clientY +
+					(doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+					(doc && doc.clientTop  || body && body.clientTop  || 0 );
+				}
+				// End http://stackoverflow.com/a/7790764/210827
+				return {
+					x: event.pageX,
+					y: event.pageY
+				};
+			}
+			var down = false;
+			document.addEventListener(
+				"mousedown",
+				function(e) {
+					down = true;
+					_this.last_position = get_current_position();
+				},
+				false
+			);
+			document.addEventListener(
+				"mouseup",
+				function(e) {
+					down = false;
+					_this.last_position = undefined;
+				},
+				false
+			);
+			document.addEventListener(
+				"mousemove",
+				function(e) {
+					if (down && "last_position" in _this) {
+						current_position = get_current_position();
+						var x = _this.camera.position.x,
+						z = _this.camera.position.z,
+						delta_x = 10 * ((_this.last_position.x - current_position.x) / window.innerWidth),
+						delta_y = 10 * ((current_position.y - _this.last_position.y) / window.innerHeight);
+						_this.move_camera({
+							"x": delta_x,
+							"y": delta_y
+						});
+						_this.last_position = current_position;
+					}
+				},
+				false
+			);
 		}
 	}
 
@@ -131,7 +218,7 @@
 		wave = new Wave();
 		world.init();
 		wave.init(world);
-		world.move_camera(undefined, undefined, 3.5);
+		world.move_camera({z: 3.5});
 		world.start();
 	}
 
